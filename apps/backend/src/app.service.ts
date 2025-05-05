@@ -2,6 +2,7 @@ import { Injectable, UploadedFile } from '@nestjs/common';
 import { getBucket, prisma, User } from 'src';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GenerateImageDto } from './dto/generate-image.dto';
+import cloudinary from './config/cloudinary.config';
 
 @Injectable()
 export class AppService {
@@ -9,34 +10,81 @@ export class AppService {
     return 'Hello World!';
   }
 
-  async getUsers(): Promise<User[]> {
-    const users = await prisma.user.findMany();
-    return users;
+  async generateImage(
+    data: GenerateImageDto,
+    userId: string,
+  ): Promise<{ url: string; posterUrl: string }> {
+    try {
+      const bucket = await getBucket();
+
+      const fileName = `${Date.now()}-${data.image.originalname}`;
+
+      // Upload  to bucket
+      const [file] = await bucket.upload(data.image.path, {
+        destination: fileName,
+        metadata: {
+          contentType: data.image.mimetype,
+        },
+      });
+
+      // bucket is private so expires in 7 days
+      const [url] = await file.getSignedUrl({
+        version: 'v4',
+        action: 'read',
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Upload to Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(data.image.path, {
+        folder: 'posters',
+        resource_type: 'image',
+      });
+
+      // poster url
+      const posterUrl = cloudinary.url(uploadResponse.public_id, {
+        transformation: [
+          { width: 1200, height: 630, crop: 'fill' },
+          {
+            overlay: {
+              font_family: 'Arial',
+              font_size: 50,
+              font_weight: 'bold',
+              text: data.description,
+            },
+            color: 'white',
+          },
+          { effect: 'shadow:50' },
+        ],
+        secure: true,
+      });
+
+      await prisma.poster.create({
+        data: {
+          description: data.description,
+          originalUrl: url,
+          posterUrl: posterUrl,
+          userId: userId,
+        },
+      });
+
+      return {
+        url,
+        posterUrl,
+      };
+    } catch (error) {
+      console.error('Error processing image:', error);
+      throw error;
+    }
   }
 
-  async getUser(userId: string): Promise<User | null> {
-    const user = await prisma.user.findFirst({
+  async getUserPosters(userId: string) {
+    return prisma.poster.findMany({
       where: {
-        id: userId,
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
-    return user;
-  }
-
-  async createUser(data: CreateUserDto): Promise<User> {
-    const user = await prisma.user.create({
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-      },
-    });
-    return user;
-  }
-
-  async generateImage(data: GenerateImageDto): Promise<string> {
-    getBucket();
-    return 'hello';
   }
 }

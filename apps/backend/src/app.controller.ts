@@ -5,13 +5,15 @@ import {
   NotFoundException,
   Param,
   Post,
-  Req,
   UploadedFile,
+  UseInterceptors,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from '@prisma/client';
 import { GenerateImageDto } from './dto/generate-image.dto';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Controller()
 export class AppController {
@@ -22,37 +24,22 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('/user')
-  async getUsers(): Promise<User[]> {
-    const users = await this.appService.getUsers();
-    return users;
-  }
 
-  @Get('/user/:id')
-  async getUser(@Param('id') userId: string): Promise<User> {
-    const user = await this.appService.getUser(userId);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
-  }
-
-  @Post('/user')
-  async createUser(
-    @Body()
-    createUserDto: CreateUserDto,
-  ): Promise<User> {
-    const user = await this.appService.createUser(createUserDto);
-    return user;
-  }
-
+  @UseGuards(JwtAuthGuard)
   @Post('/generate')
+  @UseInterceptors(FileInterceptor('image'))
   async generateImage(
-    @Body()
-    generateImageDto: GenerateImageDto,
-  ): Promise<string> {
-    const fileURl = await this.appService.generateImage(generateImageDto);
-    return fileURl;
+    @UploadedFile() file: Express.Multer.File,
+    @Body() generateImageDto: GenerateImageDto,
+    @Request() req,
+  ): Promise<{ url: string; posterUrl: string }> {
+    generateImageDto.image = file;
+    return this.appService.generateImage(generateImageDto, req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/posters')
+  async getUserPosters(@Request() req) {
+    return this.appService.getUserPosters(req.user.id);
   }
 }
