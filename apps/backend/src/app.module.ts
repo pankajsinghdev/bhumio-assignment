@@ -10,11 +10,13 @@ import { extname } from 'path';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: './temp',
+        destination: './uploads',
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
+          const filename = `${uniqueSuffix}${extname(file.originalname)}`;
+          console.log('Generated filename:', filename);
+          callback(null, filename);
         },
       }),
       fileFilter: (req, file, callback) => {

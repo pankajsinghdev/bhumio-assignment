@@ -3,6 +3,7 @@ import { getBucket, prisma, User } from 'src';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GenerateImageDto } from './dto/generate-image.dto';
 import cloudinary from './config/cloudinary.config';
+import * as fs from 'fs';
 
 @Injectable()
 export class AppService {
@@ -16,11 +17,24 @@ export class AppService {
   ): Promise<{ url: string; posterUrl: string }> {
     try {
       const bucket = await getBucket();
-
       const fileName = `${Date.now()}-${data.image.originalname}`;
 
-      // Upload  to bucket
-      const [file] = await bucket.upload(data.image.path, {
+      const filePath = data.image.path;
+      console.log('File path:', filePath);
+
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`File does not exist: ${filePath}`);
+      }
+
+      const stats = fs.statSync(filePath);
+      if (!stats.isFile()) {
+        throw new Error(`Path is not a file: ${filePath}`);
+      }
+
+      console.log('File stats:', stats);
+
+      // Upload to bucket
+      const [file] = await bucket.upload(filePath, {
         destination: fileName,
         metadata: {
           contentType: data.image.mimetype,
@@ -35,7 +49,7 @@ export class AppService {
       });
 
       // Upload to Cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(data.image.path, {
+      const uploadResponse = await cloudinary.uploader.upload(filePath, {
         folder: 'posters',
         resource_type: 'image',
       });
