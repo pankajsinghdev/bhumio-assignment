@@ -1,84 +1,124 @@
-# Turborepo starter
+# Bhumio Assignment
 
-This Turborepo starter is maintained by the Turborepo core team.
+This is a monorepo project built with TypeScript, using pnpm as the package manager and Turborepo for managing the workspace.
 
-## Using this example
+## Prerequisites
 
-Run the following command:
+Before you begin, ensure you have the following installed:
 
-```sh
-npx create-turbo@latest
-```
+- Node.js (version 18 or higher)
+- pnpm (version 9.0.0)
+- PostgreSQL (for database)
 
-## What's inside?
+## Getting Started
 
-This Turborepo includes the following packages/apps:
+1. **Clone the repository**
 
-### Apps and Packages
+   ```bash
+   git clone <repository-url>
+   cd bhumio-assignment
+   ```
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+2. **Environment Setup**
+   Create a `.env` file in the backend directory by copying the `.env.example`:
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+   ```bash
+   cp .env.example .env
+   ```
 
-### Utilities
+   Then, update the environment variables in `.env` with your local configuration:
 
-This Turborepo has some additional tools already setup for you:
+   - Set your database connection string
+   - Configure JWT secret
+   - Set other required environment variables
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+3. **Install dependencies**
 
-### Build
+   ```bash
+   pnpm install
+   ```
 
-To build all apps and packages, run the following command:
+4. **Running the Application**
 
-```
-cd my-turborepo
-pnpm build
-```
+   The application consists of two main parts: frontend and backend. You'll need to run both services:
 
-### Develop
+   a. **Start the Frontend**
 
-To develop all apps and packages, run the following command:
+   ```bash
+   cd frontend
+   pnpm run dev
+   ```
 
-```
-cd my-turborepo
-pnpm dev
-```
+   This will start the frontend development server, typically on port 3000.
 
-### Remote Caching
+   b. **Start the Backend**
+   Open a new terminal window, then:
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+   ```bash
+   cd backend
+   pnpm run start:dev
+   ```
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+   This will start the backend server, typically on port 3001.
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+   Note: You'll need to keep both terminal windows open to run the full application.
 
-```
-cd my-turborepo
-npx turbo login
-```
+5. **Building the project**
+   To build the project:
+   ```bash
+   pnpm build
+   ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Available Scripts
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### Frontend (in frontend directory)
 
-```
-npx turbo link
-```
+- `pnpm run dev` - Start frontend development server
+- `pnpm build` - Build the frontend
+- `pnpm lint` - Run frontend linting
+- `pnpm format` - Format frontend code
 
-## Useful Links
+### Backend (in backend directory)
 
-Learn more about the power of Turborepo:
+- `pnpm run start:dev` - Start backend development server with hot-reload
+- `pnpm run start:prod` - Start backend production server
+- `pnpm build` - Build the backend
+- `pnpm lint` - Run backend linting
+- `pnpm check-types` - Check TypeScript types
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+## Project Structure
+
+This is a monorepo managed by Turborepo with the following main directories:
+
+- `frontend/` - Contains the frontend application
+- `backend/` - Contains the backend NestJS application
+
+## Environment Variables
+
+The following environment variables are required to run the project:
+
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Environment (development/production)
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Secret key for JWT token generation
+
+## Google cloud keys
+GOOGLE_CLOUD_PROJECT=Google cloud project id
+GOOGLE_CLOUD_BUCKET=Google cloud bucket name
+
+## Cloudinary Keys
+CLOUDINARY_CLOUD_NAME = cloudinary key using which you want to generate the poster
+CLOUDINARY_API_KEY = Api key provided by cloudinary
+CLOUDINARY_API_SECRET = Api secret also provided bt cloudinary
+
+
+## Contributing
+
+1. Make sure your code is properly formatted using Prettier
+2. Run type checking before committing
+3. Ensure all tests pass
+4. Update environment variables in `.env.example` if adding new ones
+
+## License
+
+[Add your license information here]
